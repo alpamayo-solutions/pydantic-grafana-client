@@ -1,3 +1,4 @@
+from ...models import DatasourcePermissionUpdateModel
 from ..base import Base
 
 
@@ -76,8 +77,9 @@ class Rbac(Base):
         :param permission:
         :return:
         """
+        payload = DatasourcePermissionUpdateModel.validate({"permission": permission}).to_payload()
         datasource_path = "/access-control/datasources/%s/teams/%s" % (datasource_uid, team_id)
-        return await self.client.POST(datasource_path, json={"permission": permission})
+        return await self.client.POST(datasource_path, json=payload)
 
     async def set_rbac_datasources_builtin_roles(self, datasource_uid, builtin_role, permission):
         """
@@ -97,5 +99,6 @@ class Rbac(Base):
         :param permission:
         :return:
         """
+        payload = DatasourcePermissionUpdateModel.validate({"permission": permission}).to_payload()
         datasource_path = "/access-control/datasources/%s/builtInRoles/%s" % (datasource_uid, builtin_role)
-        return await self.client.POST(datasource_path, json={"permission": permission})
+        return await self.client.POST(datasource_path, json=payload)
