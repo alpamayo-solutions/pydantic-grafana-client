@@ -2,6 +2,7 @@ import warnings
 
 from verlib2 import Version
 
+from ...model import DashboardUpsertRequest
 from ..base import Base
 
 VERSION_8 = Version("8")
@@ -40,16 +41,11 @@ class Dashboard(Base):
         :return:
         """
 
-        # When `folderId` or `folderUid` are not available within the dashboard payload,
-        # populate them from the nested `meta` object, when given.
-        for attribute in ["folderId", "folderUid"]:
-            if attribute not in dashboard:
-                if "meta" in dashboard and attribute in dashboard["meta"]:
-                    dashboard = dashboard.copy()
-                    dashboard[attribute] = dashboard["meta"][attribute]
+        request_model = DashboardUpsertRequest.validate(dashboard)
+        payload = request_model.prepare_payload()
 
         put_dashboard_path = "/dashboards/db"
-        return await self.client.POST(put_dashboard_path, json=dashboard)
+        return await self.client.POST(put_dashboard_path, json=payload)
 
     async def delete_dashboard(self, dashboard_uid):
         """
