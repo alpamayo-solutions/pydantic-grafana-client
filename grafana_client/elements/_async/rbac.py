@@ -1,3 +1,4 @@
+from ...models import DatasourcePermissionUpdateModel, TeamRoleAssignmentModel, TeamRolesReplaceModel
 from ..base import Base
 
 
@@ -23,8 +24,9 @@ class Rbac(Base):
         :param role_uid:
         :return:
         """
+        payload = TeamRoleAssignmentModel.validate({"roleUid": role_uid}).to_payload()
         role_team_path = "/access-control/teams/%s/roles" % team_id
-        return await self.client.POST(role_team_path, json={"roleUid": role_uid})
+        return await self.client.POST(role_team_path, json=payload)
 
     async def add_rbac_roles_team(self, team_id, role_uids):
         """
@@ -34,8 +36,9 @@ class Rbac(Base):
         :param role_uids:
         :return:
         """
+        payload = TeamRolesReplaceModel.validate({"roleUids": role_uids}).to_payload()
         role_team_path = "/access-control/teams/%s/roles" % team_id
-        return await self.client.PUT(role_team_path, json={"roleUids": role_uids})
+        return await self.client.PUT(role_team_path, json=payload)
 
     async def remove_rbac_role_team(self, team_id, role_uid):
         """
@@ -76,8 +79,9 @@ class Rbac(Base):
         :param permission:
         :return:
         """
+        payload = DatasourcePermissionUpdateModel.validate({"permission": permission}).to_payload()
         datasource_path = "/access-control/datasources/%s/teams/%s" % (datasource_uid, team_id)
-        return await self.client.POST(datasource_path, json={"permission": permission})
+        return await self.client.POST(datasource_path, json=payload)
 
     async def set_rbac_datasources_builtin_roles(self, datasource_uid, builtin_role, permission):
         """
@@ -97,5 +101,6 @@ class Rbac(Base):
         :param permission:
         :return:
         """
+        payload = DatasourcePermissionUpdateModel.validate({"permission": permission}).to_payload()
         datasource_path = "/access-control/datasources/%s/builtInRoles/%s" % (datasource_uid, builtin_role)
-        return await self.client.POST(datasource_path, json={"permission": permission})
+        return await self.client.POST(datasource_path, json=payload)

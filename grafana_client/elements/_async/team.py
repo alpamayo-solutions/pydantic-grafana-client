@@ -4,6 +4,12 @@ import warnings
 from verlib2 import Version
 
 from ...model import PersonalPreferences
+from ...models import (
+    TeamCreateModel,
+    TeamExternalGroupModel,
+    TeamMemberModel,
+    TeamUpdateModel,
+)
 from ..base import Base
 
 VERSION_10_2_0 = Version("10.2.0")
@@ -82,8 +88,9 @@ class Teams(Base):
         :param team:
         :return:
         """
+        payload = TeamCreateModel.validate(team).to_payload()
         add_team_path = "/teams"
-        return await self.client.POST(add_team_path, json=team)
+        return await self.client.POST(add_team_path, json=payload)
 
     async def update_team(self, team_id, team):
         """
@@ -92,8 +99,9 @@ class Teams(Base):
         :param team:
         :return:
         """
+        payload = TeamUpdateModel.validate(team).to_payload()
         update_team_path = "/teams/%s" % team_id
-        return await self.client.PUT(update_team_path, json=team)
+        return await self.client.PUT(update_team_path, json=payload)
 
     async def delete_team(self, team_id):
         """
@@ -121,7 +129,7 @@ class Teams(Base):
         :return:
         """
         add_team_member_path = "/teams/%s/members" % team_id
-        payload = {"userId": user_id}
+        payload = TeamMemberModel.validate({"userId": user_id}).prepare_payload()
         return await self.client.POST(add_team_member_path, json=payload)
 
     async def remove_team_member(self, team_id, user_id):
@@ -198,8 +206,9 @@ class Teams(Base):
         :param group:
         :return:
         """
+        payload = TeamExternalGroupModel.validate({"groupId": group}).to_payload()
         team_group_path = "/teams/%s/groups" % team_id
-        return await self.client.POST(team_group_path, json={"groupId": group})
+        return await self.client.POST(team_group_path, json=payload)
 
     async def remove_team_external_group(self, team_id, group_id):
         """

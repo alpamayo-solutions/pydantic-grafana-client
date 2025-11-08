@@ -1,3 +1,11 @@
+from ..models import (
+    AlertRuleGroupModel,
+    AlertRuleModel,
+    ContactPointModel,
+    MuteTimingModel,
+    NotificationPolicyModel,
+    TemplateModel,
+)
 from .base import Base
 
 
@@ -33,7 +41,8 @@ class AlertingProvisioning(Base):
         headers = {}
         if disable_provenance:
             headers["X-Disable-Provenance"] = "true"
-        return self.client.POST(create_alertrule_path, json=alertrule, headers=headers)
+        payload = AlertRuleModel.validate(alertrule).to_payload()
+        return self.client.POST(create_alertrule_path, json=payload, headers=headers)
 
     def update_alertrule(self, alertrule_uid, alertrule, disable_provenance=False):
         """
@@ -46,7 +55,8 @@ class AlertingProvisioning(Base):
         headers = {}
         if disable_provenance:
             headers["X-Disable-Provenance"] = "true"
-        return self.client.PUT(update_alertrule_path, json=alertrule, headers=headers)
+        payload = AlertRuleModel.validate(alertrule).to_payload()
+        return self.client.PUT(update_alertrule_path, json=payload, headers=headers)
 
     def get_rule_group(self, folder_uid, group_uid):
         """
@@ -69,7 +79,8 @@ class AlertingProvisioning(Base):
         if disable_provenance:
             headers["X-Disable-Provenance"] = "true"
         update_rule_group_path = "/v1/provisioning/folder/%s/rule-groups/%s" % (folder_uid, group_uid)
-        return self.client.PUT(update_rule_group_path, json=alertrule_group, headers=headers)
+        payload = AlertRuleGroupModel.validate(alertrule_group).to_payload()
+        return self.client.PUT(update_rule_group_path, json=payload, headers=headers)
 
     def delete_alertrule(self, alertrule_uid):
         """
@@ -103,7 +114,8 @@ class AlertingProvisioning(Base):
         if disable_provenance:
             headers["X-Disable-Provenance"] = "true"
         create_contactpoint_path = "/v1/provisioning/contact-points"
-        return self.client.POST(create_contactpoint_path, json=contactpoint, headers=headers)
+        payload = ContactPointModel.validate(contactpoint).to_payload()
+        return self.client.POST(create_contactpoint_path, json=payload, headers=headers)
 
     def update_contactpoint(self, contactpoint_uid, contactpoint):
         """
@@ -113,7 +125,8 @@ class AlertingProvisioning(Base):
         @return:
         """
         update_contactpoint_path = "/v1/provisioning/contact-points/%s" % contactpoint_uid
-        return self.client.PUT(update_contactpoint_path, json=contactpoint)
+        payload = ContactPointModel.validate(contactpoint).to_payload()
+        return self.client.PUT(update_contactpoint_path, json=payload)
 
     def delete_contactpoint(self, contactpoint_uid):
         """
@@ -143,7 +156,8 @@ class AlertingProvisioning(Base):
         if disable_provenance:
             headers["X-Disable-Provenance"] = "true"
         set_notification_policy_tree_path = "/v1/provisioning/policies"
-        return self.client.PUT(set_notification_policy_tree_path, json=notification_policy_tree, headers=headers)
+        payload = NotificationPolicyModel.validate(notification_policy_tree).to_payload()
+        return self.client.PUT(set_notification_policy_tree_path, json=payload, headers=headers)
 
     def delete_notification_policy_tree(self):
         """
@@ -180,7 +194,8 @@ class AlertingProvisioning(Base):
         if disable_provenance:
             headers["X-Disable-Provenance"] = "true"
         create_mute_timing_path = "/v1/provisioning/mute-timings"
-        return self.client.POST(create_mute_timing_path, json=mutetiming, headers=headers)
+        payload = MuteTimingModel.validate(mutetiming).to_payload()
+        return self.client.POST(create_mute_timing_path, json=payload, headers=headers)
 
     def update_mute_timing(self, mutetiming_name, mutetiming):
         """
@@ -188,7 +203,8 @@ class AlertingProvisioning(Base):
         @return:
         """
         update_mute_timing_path = "/v1/provisioning/mute-timings/%s" % mutetiming_name
-        return self.client.PUT(update_mute_timing_path, json=mutetiming)
+        payload = MuteTimingModel.validate(mutetiming).to_payload()
+        return self.client.PUT(update_mute_timing_path, json=payload)
 
     def delete_mute_timing(self, mutetiming_name):
         """
@@ -227,7 +243,8 @@ class AlertingProvisioning(Base):
         if disable_provenance:
             headers["X-Disable-Provenance"] = "true"
         create_template_path = "/v1/provisioning/templates/%s" % template_name
-        return self.client.PUT(create_template_path, json=template, headers=headers)
+        payload = TemplateModel.validate(template).to_payload()
+        return self.client.PUT(create_template_path, json=payload, headers=headers)
 
     def delete_template(self, template_name):
         """

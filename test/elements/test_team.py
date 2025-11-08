@@ -1,6 +1,8 @@
 import json
 import unittest
 
+from pydantic import ValidationError
+
 from grafana_client import GrafanaApi
 from grafana_client.model import PersonalPreferences
 
@@ -187,12 +189,8 @@ class TeamsTestCase(unittest.TestCase):
         )
         team_as_json = json.dumps({"name": "MySecondTestTeam", "email": "email@example.org"})
 
-        with self.assertRaises(TypeError) as ex:
+        with self.assertRaises(ValidationError):
             self.grafana.teams.add_team(team_as_json)
-        self.assertEqual(
-            "JSON request payload has invalid shape. Accepted are dictionaries and lists. The type is: <class 'str'>",
-            str(ex.exception),
-        )
 
     @requests_mock.Mocker()
     def test_update_team(self, m):

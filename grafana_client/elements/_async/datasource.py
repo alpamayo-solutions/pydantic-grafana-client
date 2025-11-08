@@ -2,6 +2,7 @@ import json
 import logging
 import time
 import warnings
+from dataclasses import asdict, is_dataclass
 from typing import Dict, Optional, Tuple, Union
 from urllib.parse import urlencode
 
@@ -11,6 +12,7 @@ from verlib2 import Version
 from ...client import GrafanaBadInputError, GrafanaClientError, GrafanaServerError
 from ...knowledge import get_healthcheck_expression, query_factory
 from ...model import DatasourceHealthResponse, DatasourceIdentifier
+from ...models import DatasourcePermissionsModel, DatasourceUpsertModel
 from ..base import Base
 
 logger = logging.getLogger(__name__)
@@ -27,6 +29,20 @@ class Datasource(Base):
         super(Datasource, self).__init__(client)
         self.client = client
         self.api = api
+
+    @staticmethod
+    def _prepare_datasource_payload(datasource):
+        if isinstance(datasource, DatasourceUpsertModel):
+            return datasource.to_payload()
+        if is_dataclass(datasource):
+            datasource = asdict(datasource)
+        model = DatasourceUpsertModel.validate(datasource)
+        return model.to_payload()
+
+    @staticmethod
+    def _prepare_permissions_payload(permissions):
+        model = DatasourcePermissionsModel.validate(permissions)
+        return model.to_payload()
 
     async def health(self, datasource_uid: str):
         """
@@ -108,7 +124,8 @@ class Datasource(Base):
         :return:
         """
         create_datasources_path = "/datasources"
-        return await self.client.POST(create_datasources_path, json=datasource)
+        payload = await self._prepare_datasource_payload(datasource)
+        return await self.client.POST(create_datasources_path, json=payload)
 
     async def update_datasource(self, datasource_id, datasource):
         """
@@ -118,7 +135,8 @@ class Datasource(Base):
         :return:
         """
         update_datasource = "/datasources/%s" % datasource_id
-        return await self.client.PUT(update_datasource, json=datasource)
+        payload = await self._prepare_datasource_payload(datasource)
+        return await self.client.PUT(update_datasource, json=payload)
 
     async def update_datasource_by_uid(self, datasource_uid, datasource):
         """
@@ -128,7 +146,8 @@ class Datasource(Base):
         :return:
         """
         update_datasource = "/datasources/uid/%s" % datasource_uid
-        return await self.client.PUT(update_datasource, json=datasource)
+        payload = await self._prepare_datasource_payload(datasource)
+        return await self.client.PUT(update_datasource, json=payload)
 
     async def list_datasources(self):
         """
@@ -218,7 +237,8 @@ class Datasource(Base):
             raise NotImplementedError("Deprecated since Grafana 10.2.3, please use set_rbac_datasources_*()")
 
         get_datasource_path = "/datasources/%s/permissions" % datasource_id
-        return await self.client.POST(get_datasource_path, json=permissions)
+        payload = await self._prepare_permissions_payload(permissions)
+        return await self.client.POST(get_datasource_path, json=payload)
 
     async def remove_datasource_permissions(self, datasource_id, permission_id):
         """

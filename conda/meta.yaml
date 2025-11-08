@@ -17,9 +17,11 @@ requirements:
   host:
     - python
     - requests
+    - pydantic >=1.10,<3
   run:
     - python
     - requests
+    - pydantic >=1.10,<3
 
 test:
   imports:

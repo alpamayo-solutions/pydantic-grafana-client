@@ -1,3 +1,9 @@
+from ...models import (
+    AdminChangePassword,
+    AdminChangePermissions,
+    AdminCreateUser,
+    AdminPauseAlerts,
+)
 from ..base import Base
 
 
@@ -28,8 +34,9 @@ class Admin(Base):
         :param user:
         :return:
         """
+        payload = AdminCreateUser.validate(user).to_payload()
         create_user_path = "/admin/users"
-        return await self.client.POST(create_user_path, json=user)
+        return await self.client.POST(create_user_path, json=payload)
 
     async def change_user_password(self, user_id, password):
         """
@@ -38,8 +45,9 @@ class Admin(Base):
         :param password:
         :return:
         """
+        payload = AdminChangePassword.validate({"password": password}).to_payload()
         change_user_password_path = "/admin/users/%s/password" % user_id
-        return await self.client.PUT(change_user_password_path, json={"password": password})
+        return await self.client.PUT(change_user_password_path, json=payload)
 
     async def change_user_permissions(self, user_id, is_grafana_admin):
         """
@@ -48,8 +56,9 @@ class Admin(Base):
         :param is_grafana_admin:
         :return:
         """
+        payload = AdminChangePermissions.validate({"isGrafanaAdmin": is_grafana_admin}).to_payload()
         change_user_permissions = "/admin/users/%s/permissions" % user_id
-        return await self.client.PUT(change_user_permissions, json={"isGrafanaAdmin": is_grafana_admin})
+        return await self.client.PUT(change_user_permissions, json=payload)
 
     async def delete_user(self, user_id):
         """
@@ -66,8 +75,9 @@ class Admin(Base):
         :param pause:
         :return:
         """
+        payload = AdminPauseAlerts.validate({"paused": pause}).prepare_payload()
         change_user_permissions = "/admin/pause-all-alerts"
-        return await self.client.POST(change_user_permissions, json={"paused": pause})
+        return await self.client.POST(change_user_permissions, json=payload)
 
     async def set_user_enabled(self, user_id, enabled: bool):
         """

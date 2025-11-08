@@ -10,21 +10,20 @@
 [![Status](https://img.shields.io/pypi/status/grafana-client.svg?style=flat-square)](https://pypi.org/project/grafana-client/)
 [![PyPI](https://img.shields.io/pypi/v/grafana-client.svg?style=flat-square)](https://pypi.org/project/grafana-client/)
 [![Downloads](https://img.shields.io/pypi/dm/grafana-client.svg?style=flat-square)](https://pypi.org/project/grafana-client/)
-<!-- [![Conda](https://img.shields.io/conda/v/grafana-toolbox/grafana-client.svg?style=flat-square)](https://anaconda.org/grafana-toolbox/grafana-client) -->
 
+<!-- [![Conda](https://img.shields.io/conda/v/grafana-toolbox/grafana-client.svg?style=flat-square)](https://anaconda.org/grafana-toolbox/grafana-client) -->
 
 ## About
 
 A client library for accessing the Grafana HTTP API, written in Python.
 
-
 ## Setup
 
 Install the package from PyPI.
+
 ```
 pip install --upgrade grafana-client
 ```
-
 
 ## Usage
 
@@ -33,7 +32,57 @@ pip install --upgrade grafana-client
 This section gives you an idea about how to use the API on behalf of a few
 samples.
 
+#### Request validation with Pydantic
+
+Most write operations in Grafana expect a well-structured JSON payload. Historically,
+`grafana-client` forwarded whatever dictionary the caller supplied. That helped the
+library stay lightweight, but also meant that malformed payloads were only rejected by
+Grafana itself, often producing cryptic 4xx responses.
+
+Starting with the Pydantic integration, request payloads are validated on the client
+side before they ever reach Grafana. Each API family now exposes a corresponding schema
+in `grafana_client.models`, for example:
+
+- `DashboardUpsertRequest` describing payloads for `dashboard.update_dashboard`
+- `DatasourceUpsertModel` used by data source create/update calls
+- `TeamCreateModel`, `TeamUpdateModel`, etc. for team management
+- `OrganizationCreateModel` and friends for org administration
+- `ServiceAccountCreateModel`, `SnapshotCreateModel`, and many more
+
+Whenever you call a mutating method (e.g. `grafana.dashboard.update_dashboard`, `grafana.teams.add_team`),
+the library runs the provided payload through the matching Pydantic model. If validation
+fails, a `pydantic.ValidationError` is raised immediately, with a detailed field-level
+error message. This gives developers faster feedback loops, avoids round-trips to Grafana,
+and documents Grafana’s request contracts right in Python code.
+
+Architecturally, these models live under `grafana_client/models/` grouped by API area
+(dashboards, data sources, annotations, teams, service accounts, organizations, …).
+Each model inherits from a common `GrafanaBaseModel`, which allows extra fields by default
+to preserve backward compatibility and handles conversion to the JSON payload Grafana
+expects. High-level client classes import the relevant model and call `Model.validate(...)`
+before issuing HTTP requests, so validation is enforced consistently for both synchronous
+and asynchronous clients.
+
+Because the models are exported, you can also construct them explicitly in your own code:
+
+```python
+from grafana_client.models import DashboardUpsertRequest
+
+request = DashboardUpsertRequest(
+    dashboard={"title": "Production", "panels": [...]},
+    folderId=0,
+    overwrite=True,
+)
+grafana.dashboard.update_dashboard(request)
+```
+
+Using the schema objects directly makes it easier to build payloads programmatically and
+gives you IDE/type-checker support. For endpoints that still accept loose dictionaries,
+the library continues to work as before; schema coverage will grow incrementally across
+releases.
+
 #### Synchronous
+
 ```python
 from grafana_client import GrafanaApi
 
@@ -110,7 +159,6 @@ folder] of this repository.
 Feel free to use them as blueprints for your own programs. If you think your
 exercises could be useful for others, don't hesitate to share them back.
 
-
 ## Configuration Settings
 
 ### Authentication
@@ -170,6 +218,7 @@ Please note that, on top of the specific examples above, the object obtained by
 
 `niquests` support using a custom DNS resolver, like but not limited, DNS-over-HTTPS, and DNS-over-QUIC.
 You will have to set `NIQUESTS_DNS_URL` environment variable. For example:
+
 ```
 export NIQUESTS_DNS_URL="doh+cloudflare://"
 ```
@@ -202,6 +251,7 @@ API Tokens are bound to a single organization, so the `organization_id` paramete
 The underlying `niquests` library honors the `HTTP_PROXY` and `HTTPS_PROXY`
 environment variables. Setting them before invoking an application using
 `grafana-client` has been confirmed to work. For example:
+
 ```
 export HTTP_PROXY=10.10.1.10:3128
 export HTTPS_PROXY=10.10.1.11:1080
@@ -211,6 +261,7 @@ export HTTPS_PROXY=10.10.1.11:1080
 
 By default a session pool size of 10 is used. This can be changed by passing
 the `session_pool_size` argument to the `GrafanaApi` constructor:
+
 ```python
 grafana.client.session_pool_size = 32
 ```
@@ -222,7 +273,6 @@ The default timeout value is five seconds, used for both connect and read timeou
 The constructors of `GrafanaApi` and `GrafanaClient`, as well as the factory methods
 `from_url` and `from_env` accept the `timeout` argument, which can be obtained as a
 scalar `float` value, or as a tuple of `(<read timeout>, <connect timeout>)`.
-
 
 ## Details
 
@@ -236,34 +286,33 @@ versions of Grafana might not support certain features or subsystems.
 
 ### Overview
 
-| API | Status |
-|---|---|
-| Admin | + |
-| Alerting | +- |
-| Alerting Notification Channels | + |
-| Alerting Provisioning | + |
-| Annotations | + |
-| Authentication | +- |
-| Dashboard | + |
-| Dashboard Versions | + |
-| Dashboard Permissions | + |
-| Data Source | + |
-| Data Source Permissions | + |
-| External Group Sync | + |
-| Folder | + |
-| Folder Permissions | + |
-| Folder/Dashboard Search | +- |
-| Health | + |
-| Library Elements | + |
-| Organisation | + |
-| Other | + |
-| Plugin | + |
-| Preferences | + |
-| Rbac | +- |
-| Snapshot | + |
-| Teams | + |
-| User | + |
-
+| API                            | Status |
+| ------------------------------ | ------ |
+| Admin                          | +      |
+| Alerting                       | +-     |
+| Alerting Notification Channels | +      |
+| Alerting Provisioning          | +      |
+| Annotations                    | +      |
+| Authentication                 | +-     |
+| Dashboard                      | +      |
+| Dashboard Versions             | +      |
+| Dashboard Permissions          | +      |
+| Data Source                    | +      |
+| Data Source Permissions        | +      |
+| External Group Sync            | +      |
+| Folder                         | +      |
+| Folder Permissions             | +      |
+| Folder/Dashboard Search        | +-     |
+| Health                         | +      |
+| Library Elements               | +      |
+| Organisation                   | +      |
+| Other                          | +      |
+| Plugin                         | +      |
+| Preferences                    | +      |
+| Rbac                           | +-     |
+| Snapshot                       | +      |
+| Teams                          | +      |
+| User                           | +      |
 
 ### Data source health check
 
@@ -305,7 +354,6 @@ Health checks are supported for these Grafana data source types.
 We are humbly asking the community to contribute adapters for other data
 source types, popular or not.
 
-
 ## Applications
 
 A list of applications based on `grafana-client`.
@@ -315,7 +363,6 @@ A list of applications based on `grafana-client`.
 - [grafana-snapshots-tool](https://github.com/peekjef72/grafana-snapshots-tool)
 - [grafana-wtf](https://github.com/grafana-toolbox/grafana-wtf)
 - [nixops-grafana](https://github.com/tewfik-ghariani/nixops-grafana)
-
 
 ## Project information
 
@@ -329,12 +376,10 @@ because the repository stopped receiving updates since more than a year.
 While forking it, we renamed the package to `grafana-client` and slightly
 trimmed the module namespace.
 
-
 ### Acknowledgements
 
 Thanks to the original authors and all [contributors] who helped to co-create
 and conceive this software in one way or another. You know who you are.
-
 
 ### Contributing
 
@@ -344,12 +389,10 @@ report or fix a bug.
 
 The issue tracker URL is: https://github.com/grafana-toolbox/grafana-client/issues
 
-
 ### Development
 
 In order to set up a development environment for `grafana-client`, please
 follow the [development documentation].
-
 
 ### License
 
@@ -361,7 +404,6 @@ follow the [development documentation].
 
 Special thanks to the people at JetBrains s.r.o. for supporting us with
 excellent development tooling.
-
 
 [Andrew Prokhorenkov]: https://github.com/m0nhawk/grafana_api
 [contributors]: https://github.com/grafana-toolbox/grafana-client/graphs/contributors

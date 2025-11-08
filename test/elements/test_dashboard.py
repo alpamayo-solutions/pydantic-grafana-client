@@ -1,6 +1,9 @@
 import unittest
 
+from pydantic import ValidationError
+
 from grafana_client import GrafanaApi
+from grafana_client.model import DashboardUpsertRequest
 
 from ..compat import requests_mock
 
@@ -108,6 +111,23 @@ class DashboardTestCase(unittest.TestCase):
 
         self.assertEqual(dashboard["uid"], "cIBgcSjkk")
         self.assertEqual(dashboard["status"], "success")
+
+    @requests_mock.Mocker()
+    def test_update_dashboard_normalizes_overwrite_flag(self, m):
+        m.post("http://localhost/api/dashboards/db", json={})
+        self.grafana.dashboard.update_dashboard({"dashboard": {}, "overwrite": "true"})
+        self.assertTrue(m.last_request.json()["overwrite"])
+
+    @requests_mock.Mocker()
+    def test_update_dashboard_with_model_instance(self, m):
+        m.post("http://localhost/api/dashboards/db", json={})
+        payload = DashboardUpsertRequest(dashboard={"title": "Example"}, overwrite=False)
+        self.grafana.dashboard.update_dashboard(payload)
+        self.assertIn("dashboard", m.last_request.json())
+
+    def test_update_dashboard_validation_error(self):
+        with self.assertRaises(ValidationError):
+            self.grafana.dashboard.update_dashboard({"dashboard": {}, "folderId": "boom"})
 
     @requests_mock.Mocker()
     def test_update_dashboard_roundtrip_folder_1(self, m):

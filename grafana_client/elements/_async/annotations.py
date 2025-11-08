@@ -1,3 +1,4 @@
+from ...models import AnnotationGraphiteModel, AnnotationModel
 from ..base import Base
 
 
@@ -80,7 +81,7 @@ class Annotations(Base):
         panel_id=None,
         time_from=None,
         time_to=None,
-        tags=[],
+        tags=None,
         text=None,
     ):
         """
@@ -97,7 +98,7 @@ class Annotations(Base):
         """
 
         annotations_path = "/annotations"
-        payload = {
+        data = {
             "panelId": panel_id,
             "time": time_from,
             "timeEnd": time_to,
@@ -105,16 +106,17 @@ class Annotations(Base):
             "text": text,
         }
         if dashboard_id is not None:
-            payload["dashboardId"] = dashboard_id
+            data["dashboardId"] = dashboard_id
         if dashboard_uid is not None:
-            payload["dashboardUID"] = dashboard_uid
+            data["dashboardUID"] = dashboard_uid
 
+        payload = AnnotationModel.validate(data).prepare_payload()
         return await self.client.POST(annotations_path, json=payload)
 
     async def add_annotation_graphite(
         self,
         what=None,
-        tags=[],
+        tags=None,
         when=None,
         data=None,
     ):
@@ -129,7 +131,14 @@ class Annotations(Base):
         """
 
         annotations_path = "/annotations/graphite"
-        payload = {"what": what, "tags": tags, "when": when, "data": data}
+        payload = AnnotationGraphiteModel.validate(
+            {
+                "what": what,
+                "tags": tags,
+                "when": when,
+                "data": data,
+            }
+        ).prepare_payload()
 
         return await self.client.POST(annotations_path, json=payload)
 
@@ -138,7 +147,7 @@ class Annotations(Base):
         annotations_id,
         time_from=None,
         time_to=None,
-        tags=[],
+        tags=None,
         text=None,
     ):
         """
@@ -151,7 +160,14 @@ class Annotations(Base):
         :return:
         """
         annotations_path = f"/annotations/{annotations_id}"
-        payload = {"time": time_from, "timeEnd": time_to, "tags": tags, "text": text}
+        payload = AnnotationModel.validate(
+            {
+                "time": time_from,
+                "timeEnd": time_to,
+                "tags": tags,
+                "text": text,
+            }
+        ).prepare_payload()
 
         return await self.client.PUT(annotations_path, json=payload)
 
@@ -160,7 +176,7 @@ class Annotations(Base):
         annotations_id,
         time_from=None,
         time_to=None,
-        tags=[],
+        tags=None,
         text=None,
     ):
         """
@@ -176,7 +192,14 @@ class Annotations(Base):
         annotations_path = f"/annotations/{annotations_id}"
         payload = {}
 
-        payload = {"time": time_from, "timeEnd": time_to, "tags": tags, "text": text}
+        payload = AnnotationModel.validate(
+            {
+                "time": time_from,
+                "timeEnd": time_to,
+                "tags": tags,
+                "text": text,
+            }
+        ).prepare_payload()
 
         return await self.client.PATCH(annotations_path, json=payload)
 

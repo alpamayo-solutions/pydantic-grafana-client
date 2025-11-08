@@ -1,3 +1,4 @@
+from ...models import AlertRuleModel
 from ..base import Base
 
 
@@ -26,8 +27,9 @@ class Alerting(Base):
         :param alertrule:
         :return:
         """
+        payload = AlertRuleModel.validate(alertrule).to_payload()
         create_alertrule_path = "/ruler/grafana/api/v1/rules/%s" % folder_name
-        return await self.client.POST(create_alertrule_path, json=alertrule)
+        return await self.client.POST(create_alertrule_path, json=payload)
 
     async def update_alertrule(self, folder_name, alertrule):
         """
@@ -36,8 +38,9 @@ class Alerting(Base):
         @return:
         """
 
+        payload = AlertRuleModel.validate(alertrule).to_payload()
         update_alertrule_path = "/ruler/grafana/api/v1/rules/%s" % folder_name
-        return await self.client.POST(update_alertrule_path, json=alertrule)
+        return await self.client.POST(update_alertrule_path, json=payload)
 
     async def delete_alertrule(self, folder_name, alertrule_name):
         """

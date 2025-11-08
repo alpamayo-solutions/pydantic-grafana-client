@@ -1,3 +1,4 @@
+from ..models import DashboardDiffModel, DashboardRestoreModel
 from .base import Base
 
 
@@ -68,7 +69,8 @@ class DashboardVersions(Base):
         if version_id is None:
             raise LookupError("version_id is required")
 
-        return self.client.POST(restore_dashboard_path, json={"version": version_id})
+        payload = DashboardRestoreModel.validate({"version": version_id}).to_payload()
+        return self.client.POST(restore_dashboard_path, json=payload)
 
     def restore_dashboard_by_id(self, dashboard_id: int = None, version_id: int = None):
         return self.restore_dashboard(dashboard_id=dashboard_id, version_id=version_id)
@@ -94,11 +96,11 @@ class DashboardVersions(Base):
         if diff_type not in ["json", "basic"]:
             raise LookupError("diff_type must be either 'json' or 'basic'")
 
-        return self.client.POST(
-            calculate_diff_path,
-            json={
+        payload = DashboardDiffModel.validate(
+            {
                 "base": {"dashboardId": base_dashboard_id, "version": base_version_id},
                 "new": {"dashboardId": new_dashboard_id, "version": new_version_id},
                 "diffType": diff_type,
-            },
-        )
+            }
+        ).to_payload()
+        return self.client.POST(calculate_diff_path, json=payload)
