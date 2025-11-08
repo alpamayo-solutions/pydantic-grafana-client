@@ -1,4 +1,5 @@
 import warnings
+from typing import Any, Mapping, Union
 
 from ..model import PersonalPreferences
 from ..models import (
@@ -32,7 +33,7 @@ class Organization(Base):
         get_current_organization_path = "/org"
         return self.client.GET(get_current_organization_path)
 
-    def create_organization(self, organization):
+    def create_organization(self, organization: Union[str, OrganizationCreateModel, Mapping[str, Any]]) -> dict:
         """
 
         :param organization:
@@ -44,7 +45,7 @@ class Organization(Base):
         create_orgs_path = "/orgs"
         return self.client.POST(create_orgs_path, json=payload)
 
-    def update_current_organization(self, organization):
+    def update_current_organization(self, organization: Union[OrganizationUpdateModel, Mapping[str, Any]]) -> dict:
         """
 
         :param organization:
@@ -62,7 +63,7 @@ class Organization(Base):
         get_current_organization_users_path = "/org/users"
         return self.client.GET(get_current_organization_users_path)
 
-    def add_user_current_organization(self, user):
+    def add_user_current_organization(self, user: Union[OrganizationUserCreateModel, Mapping[str, Any]]) -> dict:
         """
 
         :param user:
@@ -72,7 +73,9 @@ class Organization(Base):
         add_user_current_organization_path = "/org/users"
         return self.client.POST(add_user_current_organization_path, json=payload)
 
-    def update_user_current_organization(self, user_id, user):
+    def update_user_current_organization(
+        self, user_id: int, user: Union[OrganizationUserUpdateModel, Mapping[str, Any]]
+    ) -> dict:
         """
 
         :param user_id:
@@ -147,7 +150,9 @@ class Organizations(Base):
         self.client = client
         self.api = api
 
-    def update_organization(self, organization_id, organization):
+    def update_organization(
+        self, organization_id: int, organization: Union[OrganizationUpdateModel, Mapping[str, Any]]
+    ) -> dict:
         """
 
         :param organization_id:
@@ -193,7 +198,9 @@ class Organizations(Base):
         users_in_org = "/orgs/%s/users" % organization_id
         return self.client.GET(users_in_org)
 
-    def organization_user_add(self, organization_id, user):
+    def organization_user_add(
+        self, organization_id: int, user: Union[OrganizationUserCreateModel, Mapping[str, Any]]
+    ) -> dict:
         """
 
         :param organization_id:
@@ -204,7 +211,7 @@ class Organizations(Base):
         add_user_path = "/orgs/%s/users" % organization_id
         return self.client.POST(add_user_path, json=payload)
 
-    def organization_user_update(self, organization_id, user_id, user_role):
+    def organization_user_update(self, organization_id: int, user_id: int, user_role: str) -> dict:
         """
 
         :param organization_id:

@@ -3,7 +3,7 @@ import logging
 import time
 import warnings
 from dataclasses import asdict, is_dataclass
-from typing import Dict, Optional, Tuple, Union
+from typing import Any, Dict, Mapping, Optional, Tuple, Union
 from urllib.parse import urlencode
 
 from niquests import ReadTimeout
@@ -31,7 +31,7 @@ class Datasource(Base):
         self.api = api
 
     @staticmethod
-    def _prepare_datasource_payload(datasource):
+    def _prepare_datasource_payload(datasource: Union[DatasourceUpsertModel, Mapping[str, Any]]) -> Dict[str, Any]:
         if isinstance(datasource, DatasourceUpsertModel):
             return datasource.to_payload()
         if is_dataclass(datasource):
@@ -40,7 +40,9 @@ class Datasource(Base):
         return model.to_payload()
 
     @staticmethod
-    def _prepare_permissions_payload(permissions):
+    def _prepare_permissions_payload(
+        permissions: Union[DatasourcePermissionsModel, Mapping[str, Any]],
+    ) -> Dict[str, Any]:
         model = DatasourcePermissionsModel.validate(permissions)
         return model.to_payload()
 
@@ -117,7 +119,7 @@ class Datasource(Base):
             raise KeyError("Data source must be identified by one of id, uid, or name")
         return datasource
 
-    def create_datasource(self, datasource):
+    def create_datasource(self, datasource: Union[DatasourceUpsertModel, Mapping[str, Any]]) -> Dict[str, Any]:
         """
 
         :param datasource:
@@ -127,7 +129,11 @@ class Datasource(Base):
         payload = self._prepare_datasource_payload(datasource)
         return self.client.POST(create_datasources_path, json=payload)
 
-    def update_datasource(self, datasource_id, datasource):
+    def update_datasource(
+        self,
+        datasource_id: int,
+        datasource: Union[DatasourceUpsertModel, Mapping[str, Any]],
+    ) -> Dict[str, Any]:
         """
 
         :param datasource_id:
@@ -138,7 +144,11 @@ class Datasource(Base):
         payload = self._prepare_datasource_payload(datasource)
         return self.client.PUT(update_datasource, json=payload)
 
-    def update_datasource_by_uid(self, datasource_uid, datasource):
+    def update_datasource_by_uid(
+        self,
+        datasource_uid: str,
+        datasource: Union[DatasourceUpsertModel, Mapping[str, Any]],
+    ) -> Dict[str, Any]:
         """
 
         :param datasource_uid:
@@ -225,7 +235,11 @@ class Datasource(Base):
         get_datasource_path = "/datasources/%s/permissions" % datasource_id
         return self.client.GET(get_datasource_path)
 
-    def add_datasource_permissions(self, datasource_id, permissions):
+    def add_datasource_permissions(
+        self,
+        datasource_id: int,
+        permissions: Union[DatasourcePermissionsModel, Mapping[str, Any]],
+    ) -> Dict[str, Any]:
         """
         The Data Source Permissions is only available in Grafana Enterprise.
 

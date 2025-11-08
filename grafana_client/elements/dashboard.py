@@ -1,4 +1,5 @@
 import warnings
+from typing import Any, Mapping, Union
 
 from verlib2 import Version
 
@@ -34,7 +35,7 @@ class Dashboard(Base):
         get_dashboard_path = "/dashboards/db/%s" % dashboard_name
         return self.client.GET(get_dashboard_path)
 
-    def update_dashboard(self, dashboard):
+    def update_dashboard(self, dashboard: Union[DashboardUpsertRequest, Mapping[str, Any]]) -> dict:
         """
 
         :param dashboard:

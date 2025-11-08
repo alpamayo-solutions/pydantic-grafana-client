@@ -1,3 +1,5 @@
+from typing import Any, Mapping, Union
+
 from ..models import (
     AdminChangePassword,
     AdminChangePermissions,
@@ -28,7 +30,7 @@ class Admin(Base):
         path = "/admin/stats"
         return self.client.GET(path)
 
-    def create_user(self, user):
+    def create_user(self, user: Union[AdminCreateUser, Mapping[str, Any]]) -> dict:
         """
 
         :param user:
@@ -38,7 +40,7 @@ class Admin(Base):
         create_user_path = "/admin/users"
         return self.client.POST(create_user_path, json=payload)
 
-    def change_user_password(self, user_id, password):
+    def change_user_password(self, user_id: int, password: str) -> dict:
         """
 
         :param user_id:
@@ -49,7 +51,7 @@ class Admin(Base):
         change_user_password_path = "/admin/users/%s/password" % user_id
         return self.client.PUT(change_user_password_path, json=payload)
 
-    def change_user_permissions(self, user_id, is_grafana_admin):
+    def change_user_permissions(self, user_id: int, is_grafana_admin: bool) -> dict:
         """
 
         :param user_id:
@@ -60,7 +62,7 @@ class Admin(Base):
         change_user_permissions = "/admin/users/%s/permissions" % user_id
         return self.client.PUT(change_user_permissions, json=payload)
 
-    def delete_user(self, user_id):
+    def delete_user(self, user_id: int) -> dict:
         """
 
         :param user_id:
@@ -69,7 +71,7 @@ class Admin(Base):
         delete_user_path = "/admin/users/%s" % user_id
         return self.client.DELETE(delete_user_path)
 
-    def pause_all_alerts(self, pause):
+    def pause_all_alerts(self, pause: Union[bool, str]) -> dict:
         """
 
         :param pause:
@@ -79,7 +81,7 @@ class Admin(Base):
         change_user_permissions = "/admin/pause-all-alerts"
         return self.client.POST(change_user_permissions, json=payload)
 
-    def set_user_enabled(self, user_id, enabled: bool):
+    def set_user_enabled(self, user_id: int, enabled: bool) -> dict:
         """
 
         :param user_id:

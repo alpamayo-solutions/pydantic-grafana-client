@@ -1,3 +1,5 @@
+from typing import Any, Mapping, Sequence, Union
+
 from ..models import (
     FolderCreateModel,
     FolderMoveModel,
@@ -33,7 +35,12 @@ class Folder(Base):
         path = "/folders/%s" % uid
         return self.client.GET(path)
 
-    def create_folder(self, title, uid=None, parent_uid=None):
+    def create_folder(
+        self,
+        title: str,
+        uid: str = None,
+        parent_uid: str = None,
+    ) -> dict:
         """
 
         :param title:
@@ -50,7 +57,7 @@ class Folder(Base):
         ).to_payload()
         return self.client.POST("/folders", json=payload)
 
-    def move_folder(self, uid, parent_uid):
+    def move_folder(self, uid: str, parent_uid: str) -> dict:
         """
         Move a folder beneath another parent folder.
 
@@ -64,7 +71,14 @@ class Folder(Base):
         path = "/folders/%s/move" % uid
         return self.client.POST(path, json=payload)
 
-    def update_folder(self, uid, title=None, version=None, overwrite=False, new_uid=None):
+    def update_folder(
+        self,
+        uid: str,
+        title: str = None,
+        version: int = None,
+        overwrite: bool = False,
+        new_uid: str = None,
+    ) -> dict:
         """
 
         :param uid:
@@ -112,7 +126,11 @@ class Folder(Base):
         path = "/folders/%s/permissions" % uid
         return self.client.GET(path)
 
-    def update_folder_permissions(self, uid, items):
+    def update_folder_permissions(
+        self,
+        uid: str,
+        items: Sequence[Mapping[str, Any]],
+    ) -> dict:
         """
 
         :param uid:
@@ -123,7 +141,12 @@ class Folder(Base):
         update_folder_permissions_path = "/folders/%s/permissions" % uid
         return self.client.POST(update_folder_permissions_path, json=payload)
 
-    def update_folder_permissions_for_user(self, uid, user_id, items):
+    def update_folder_permissions_for_user(
+        self,
+        uid: str,
+        user_id: Union[int, str],
+        items: Sequence[Mapping[str, Any]],
+    ) -> dict:
         """
 
         :param uid:

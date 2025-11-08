@@ -1,3 +1,5 @@
+from typing import Any, Dict, Optional
+
 from ...models import SnapshotCreateModel
 from ..base import Base
 
@@ -9,13 +11,13 @@ class Snapshots(Base):
 
     async def create_new_snapshot(
         self,
-        dashboard=None,
-        name=None,
-        expires=None,
-        external=None,
-        key=None,
-        delete_key=None,
-    ):
+        dashboard: Dict[str, Any] = None,
+        name: Optional[str] = None,
+        expires: Optional[int] = None,
+        external: Optional[bool] = None,
+        key: Optional[str] = None,
+        delete_key: Optional[str] = None,
+    ) -> dict:
         """
 
         :param dashboard:  Required. The complete dashboard model.

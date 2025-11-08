@@ -29,7 +29,7 @@ class DashboardVersions(Base):
 
     def get_dashboard_versions(
         self, dashboard_id: int = None, dashboard_uid: str = None, limit: int = None, start: int = None
-    ):
+    ) -> list:
         api_path = self.api_path(dashboard_id=dashboard_id, dashboard_uid=dashboard_uid)
         dashboard_versions_path = f"{api_path}/versions"
 
@@ -62,7 +62,7 @@ class DashboardVersions(Base):
     def get_dashboard_version_by_uid(self, dashboard_uid: int = None, version_id: int = None):
         return self.get_dashboard_version(dashboard_uid=dashboard_uid, version_id=version_id)
 
-    def restore_dashboard(self, dashboard_id: int = None, dashboard_uid: str = None, version_id: int = None):
+    def restore_dashboard(self, dashboard_id: int = None, dashboard_uid: str = None, version_id: int = None) -> dict:
         api_path = self.api_path(dashboard_id=dashboard_id, dashboard_uid=dashboard_uid)
         restore_dashboard_path = f"{api_path}/restore"
 
@@ -85,7 +85,7 @@ class DashboardVersions(Base):
         new_dashboard_id: int,
         new_version_id: int,
         diff_type: str = "json",
-    ):
+    ) -> dict:
         """
         Compares two dashboard versions by calculating the JSON diff of them.
 

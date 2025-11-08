@@ -1,3 +1,5 @@
+from typing import Any, Mapping, Union
+
 from ..models import (
     AlertRuleGroupModel,
     AlertRuleModel,
@@ -31,7 +33,9 @@ class AlertingProvisioning(Base):
         get_alertrule_path = "/v1/provisioning/alert-rules/%s" % alertrule_uid
         return self.client.GET(get_alertrule_path)
 
-    def create_alertrule(self, alertrule, disable_provenance=False):
+    def create_alertrule(
+        self, alertrule: Union[AlertRuleModel, Mapping[str, Any]], disable_provenance: bool = False
+    ) -> dict:
         """
         :param alertrule:
         :param disable_provenance:
@@ -44,7 +48,12 @@ class AlertingProvisioning(Base):
         payload = AlertRuleModel.validate(alertrule).to_payload()
         return self.client.POST(create_alertrule_path, json=payload, headers=headers)
 
-    def update_alertrule(self, alertrule_uid, alertrule, disable_provenance=False):
+    def update_alertrule(
+        self,
+        alertrule_uid: str,
+        alertrule: Union[AlertRuleModel, Mapping[str, Any]],
+        disable_provenance: bool = False,
+    ) -> dict:
         """
         :param alertrule_uid:
         :param alertrule:
@@ -68,7 +77,13 @@ class AlertingProvisioning(Base):
         get_rule_group_path = "/v1/provisioning/folder/%s/rule-groups/%s" % (folder_uid, group_uid)
         return self.client.GET(get_rule_group_path)
 
-    def update_rule_group(self, folder_uid, group_uid, alertrule_group, disable_provenance=False):
+    def update_rule_group(
+        self,
+        folder_uid: str,
+        group_uid: str,
+        alertrule_group: Union[AlertRuleGroupModel, Mapping[str, Any]],
+        disable_provenance: bool = False,
+    ) -> dict:
         """
         :param folder_uid:
         :param group_uid:
@@ -103,7 +118,9 @@ class AlertingProvisioning(Base):
             params = {"name": name}
         return self.client.GET(path, params=params)
 
-    def create_contactpoint(self, contactpoint, disable_provenance=False):
+    def create_contactpoint(
+        self, contactpoint: Union[ContactPointModel, Mapping[str, Any]], disable_provenance: bool = False
+    ) -> dict:
         """
         Creates single contact point
         @param contactpoint:
@@ -117,7 +134,9 @@ class AlertingProvisioning(Base):
         payload = ContactPointModel.validate(contactpoint).to_payload()
         return self.client.POST(create_contactpoint_path, json=payload, headers=headers)
 
-    def update_contactpoint(self, contactpoint_uid, contactpoint):
+    def update_contactpoint(
+        self, contactpoint_uid: str, contactpoint: Union[ContactPointModel, Mapping[str, Any]]
+    ) -> dict:
         """
         Updates existing contact point
         @param contactpoint_uid:
@@ -145,7 +164,11 @@ class AlertingProvisioning(Base):
         get_notification_policy_tree_path = "/v1/provisioning/policies"
         return self.client.GET(get_notification_policy_tree_path)
 
-    def set_notification_policy_tree(self, notification_policy_tree, disable_provenance=False):
+    def set_notification_policy_tree(
+        self,
+        notification_policy_tree: Union[NotificationPolicyModel, Mapping[str, Any]],
+        disable_provenance: bool = False,
+    ) -> dict:
         """
         Sets notification policy tree
         @param notification_policy_tree:
@@ -183,7 +206,9 @@ class AlertingProvisioning(Base):
         get_mute_timing_path = "/v1/provisioning/mute-timings/%s" % mutetiming_name
         return self.client.GET(get_mute_timing_path)
 
-    def create_mute_timing(self, mutetiming, disable_provenance=False):
+    def create_mute_timing(
+        self, mutetiming: Union[MuteTimingModel, Mapping[str, Any]], disable_provenance: bool = False
+    ) -> dict:
         """
         Creates single mute timing
         @param mutetiming:
@@ -197,7 +222,7 @@ class AlertingProvisioning(Base):
         payload = MuteTimingModel.validate(mutetiming).to_payload()
         return self.client.POST(create_mute_timing_path, json=payload, headers=headers)
 
-    def update_mute_timing(self, mutetiming_name, mutetiming):
+    def update_mute_timing(self, mutetiming_name: str, mutetiming: Union[MuteTimingModel, Mapping[str, Any]]) -> dict:
         """
         Updates existing mute timing
         @return:
@@ -231,7 +256,12 @@ class AlertingProvisioning(Base):
         get_template_path = "/v1/provisioning/templates/%s" % template_name
         return self.client.GET(get_template_path)
 
-    def create_or_update_template(self, template_name, template, disable_provenance=False):
+    def create_or_update_template(
+        self,
+        template_name: str,
+        template: Union[TemplateModel, Mapping[str, Any]],
+        disable_provenance: bool = False,
+    ) -> dict:
         """
         Creates or updates (if given template_name exists) template
         @param template_name:
