@@ -1,4 +1,4 @@
-from ...models import DatasourcePermissionUpdateModel
+from ...models import DatasourcePermissionUpdateModel, TeamRoleAssignmentModel, TeamRolesReplaceModel
 from ..base import Base
 
 
@@ -24,8 +24,9 @@ class Rbac(Base):
         :param role_uid:
         :return:
         """
+        payload = TeamRoleAssignmentModel.validate({"roleUid": role_uid}).to_payload()
         role_team_path = "/access-control/teams/%s/roles" % team_id
-        return await self.client.POST(role_team_path, json={"roleUid": role_uid})
+        return await self.client.POST(role_team_path, json=payload)
 
     async def add_rbac_roles_team(self, team_id, role_uids):
         """
@@ -35,8 +36,9 @@ class Rbac(Base):
         :param role_uids:
         :return:
         """
+        payload = TeamRolesReplaceModel.validate({"roleUids": role_uids}).to_payload()
         role_team_path = "/access-control/teams/%s/roles" % team_id
-        return await self.client.PUT(role_team_path, json={"roleUids": role_uids})
+        return await self.client.PUT(role_team_path, json=payload)
 
     async def remove_rbac_role_team(self, team_id, role_uid):
         """

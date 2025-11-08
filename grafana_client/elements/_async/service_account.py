@@ -4,6 +4,11 @@ https://grafana.com/docs/grafana/latest/administration/service-accounts/
 https://grafana.com/docs/grafana/latest/developers/http_api/create-api-tokens-for-org/
 """
 
+from ...models import (
+    ServiceAccountCreateModel,
+    ServiceAccountTokenCreateModel,
+    ServiceAccountUpdateModel,
+)
 from ..base import Base
 
 
@@ -32,8 +37,9 @@ class ServiceAccount(Base):
         :param service_account: {"name": "string", "role": "string"}
         :return:
         """
+        payload = ServiceAccountCreateModel.validate(service_account).to_payload()
         create_service_account_path = "/serviceaccounts/"
-        return await self.client.POST(create_service_account_path, json=service_account)
+        return await self.client.POST(create_service_account_path, json=payload)
 
     async def update(self, service_account_id, service_account):
         """
@@ -44,8 +50,9 @@ class ServiceAccount(Base):
         :param service_account: {"name": "string", "role": "string"}
         :return:
         """
+        payload = ServiceAccountUpdateModel.validate(service_account).to_payload()
         path = "/serviceaccounts/%s" % service_account_id
-        return await self.client.PATCH(path, json=service_account)
+        return await self.client.PATCH(path, json=payload)
 
     async def delete(self, service_account_id):
         """
@@ -79,8 +86,9 @@ class ServiceAccount(Base):
         :param service_account_name:
         :return:
         """
+        payload = ServiceAccountTokenCreateModel.validate(content).to_payload()
         create_service_account_token_path = "/serviceaccounts/%s/tokens" % (service_account_id)
-        return await self.client.POST(create_service_account_token_path, json=content)
+        return await self.client.POST(create_service_account_token_path, json=payload)
 
     async def delete_token(self, service_account_id, service_account_token_id):
         """

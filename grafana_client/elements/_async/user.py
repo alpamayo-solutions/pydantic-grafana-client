@@ -1,4 +1,5 @@
 from ...model import PersonalPreferences
+from ...models import UserPasswordChangeModel, UserUpdateModel
 from ..base import Base
 
 
@@ -73,8 +74,9 @@ class Users(Base):
         :param user:
         :return:
         """
+        payload = UserUpdateModel.validate(user).to_payload()
         update_user_path = "/users/%s" % user_id
-        return await self.client.PUT(update_user_path, json=user)
+        return await self.client.PUT(update_user_path, json=payload)
 
     async def get_user_organisations(self, user_id):
         """
@@ -117,12 +119,10 @@ class User(Base):
         :return:
         """
         change_actual_user_password_path = "/user/password"  # noqa: S105
-        change_actual_user_password_json = {
-            "oldPassword": old_password,
-            "newPassword": new_password,
-            "confirmNew": new_password,
-        }
-        return await self.client.PUT(change_actual_user_password_path, json=change_actual_user_password_json)
+        payload = UserPasswordChangeModel.validate(
+            {"oldPassword": old_password, "newPassword": new_password, "confirmNew": new_password}
+        ).prepare_payload()
+        return await self.client.PUT(change_actual_user_password_path, json=payload)
 
     async def switch_user_organisation(self, user_id, organisation_id):
         """

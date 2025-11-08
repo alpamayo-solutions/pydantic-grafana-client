@@ -1,6 +1,12 @@
 import warnings
 
 from ..model import PersonalPreferences
+from ..models import (
+    OrganizationCreateModel,
+    OrganizationUpdateModel,
+    OrganizationUserCreateModel,
+    OrganizationUserUpdateModel,
+)
 from .base import Base
 
 
@@ -32,8 +38,11 @@ class Organization(Base):
         :param organization:
         :return:
         """
+        if isinstance(organization, str):
+            organization = {"name": organization}
+        payload = OrganizationCreateModel.validate(organization).to_payload()
         create_orgs_path = "/orgs"
-        return self.client.POST(create_orgs_path, json={"name": organization["name"]})
+        return self.client.POST(create_orgs_path, json=payload)
 
     def update_current_organization(self, organization):
         """
@@ -41,8 +50,9 @@ class Organization(Base):
         :param organization:
         :return:
         """
+        payload = OrganizationUpdateModel.validate(organization).to_payload()
         update_current_organization_path = "/org"
-        return self.client.PUT(update_current_organization_path, json=organization)
+        return self.client.PUT(update_current_organization_path, json=payload)
 
     def get_current_organization_users(self):
         """
@@ -58,8 +68,9 @@ class Organization(Base):
         :param user:
         :return:
         """
+        payload = OrganizationUserCreateModel.validate(user).to_payload()
         add_user_current_organization_path = "/org/users"
-        return self.client.POST(add_user_current_organization_path, json=user)
+        return self.client.POST(add_user_current_organization_path, json=payload)
 
     def update_user_current_organization(self, user_id, user):
         """
@@ -68,8 +79,9 @@ class Organization(Base):
         :param user:
         :return:
         """
+        payload = OrganizationUserUpdateModel.validate(user).to_payload()
         update_user_current_organization_path = "/org/users/%s" % user_id
-        return self.client.PATCH(update_user_current_organization_path, json=user)
+        return self.client.PATCH(update_user_current_organization_path, json=payload)
 
     def delete_user_current_organization(self, user_id):
         """
@@ -142,8 +154,9 @@ class Organizations(Base):
         :param organization:
         :return:
         """
+        payload = OrganizationUpdateModel.validate(organization).to_payload()
         update_org_path = "/orgs/%s" % organization_id
-        return self.client.PUT(update_org_path, json=organization)
+        return self.client.PUT(update_org_path, json=payload)
 
     def delete_organization(self, organization_id):
         """
@@ -187,8 +200,9 @@ class Organizations(Base):
         :param user:
         :return:
         """
+        payload = OrganizationUserCreateModel.validate(user).to_payload()
         add_user_path = "/orgs/%s/users" % organization_id
-        return self.client.POST(add_user_path, json=user)
+        return self.client.POST(add_user_path, json=payload)
 
     def organization_user_update(self, organization_id, user_id, user_role):
         """
@@ -198,8 +212,9 @@ class Organizations(Base):
         :param user_role:
         :return:
         """
+        payload = OrganizationUserUpdateModel.validate({"role": user_role}).to_payload()
         patch_user = "/orgs/%s/users/%s" % (organization_id, user_id)
-        return self.client.PATCH(patch_user, json={"role": user_role})
+        return self.client.PATCH(patch_user, json=payload)
 
     def organization_user_delete(self, organization_id, user_id):
         """

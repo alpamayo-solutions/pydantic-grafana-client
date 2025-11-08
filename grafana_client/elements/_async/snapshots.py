@@ -1,3 +1,4 @@
+from ...models import SnapshotCreateModel
 from ..base import Base
 
 
@@ -28,20 +29,19 @@ class Snapshots(Base):
         :return:
         """
 
-        path = "/snapshots"
-        post_json = {"dashboard": dashboard}
-        if name:
-            post_json["name"] = name
-        if expires:
-            post_json["expires"] = expires
-        if external:
-            post_json["external"] = external
-        if key:
-            post_json["key"] = key
-        if delete_key:
-            post_json["deleteKey"] = delete_key
+        payload = SnapshotCreateModel.validate(
+            {
+                "dashboard": dashboard,
+                "name": name,
+                "expires": expires,
+                "external": external,
+                "key": key,
+                "deleteKey": delete_key,
+            }
+        ).prepare_payload()
 
-        return await self.client.POST(path, json=post_json)
+        path = "/snapshots"
+        return await self.client.POST(path, json=payload)
 
     async def get_dashboard_snapshots(self):
         """
